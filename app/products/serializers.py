@@ -47,6 +47,7 @@ class ProductListSerializer(serializers.HyperlinkedModelSerializer):
         fields = (
             'url',
             'id',
+            'slug',
             'title',
             'price',
             'image',
@@ -64,6 +65,7 @@ class ProductDetailSerializer(ProductListSerializer):
             'id',
             'title',
             'price',
+            'slug',
             'categories',
             'variations',
             'description',
