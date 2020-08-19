@@ -16,6 +16,7 @@ class UserProfile(models.Model):
 
 def userprofile_receiver(sender, instance, created, *args, **kwargs):
     if created:
+        # TODO: Remove variable
         userprofile = UserProfile.objects.create(user=instance)
 
 

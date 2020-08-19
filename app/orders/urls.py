@@ -2,17 +2,25 @@ from django.urls import path, include
 
 from .views import (
     AddToCartView,
-    OrderDetailView,
+    CartView,
+    CartItemDeleteView,
+    CartItemDecreaseQuantity
 )
 
 
 app_name = 'orders'
 
 urlpatterns = [
-    path('add-to-cart/', AddToCartView.as_view(), name='add-to-cart'),
-    path('order-summary/', OrderDetailView.as_view(), name='order-summary'),
-    # path('order-items/<pk>/delete/',
-    #      OrderItemDeleteView.as_view(), name='order-item-delete'),
-    # path('order-item/update-quantity/',
-    #      OrderQuantityUpdateView.as_view(), name='order-item-update-quantity'),
+    path('', CartView.as_view(), name='cart-items'),
+    path('add/', AddToCartView.as_view(), name='add-to-cart'),
+    path(
+        '<pk>/delete/',
+        CartItemDeleteView.as_view(),
+        name='cart-item-delete'
+    ),
+    path(
+        'decrease/',
+        CartItemDecreaseQuantity.as_view(),
+        name='cart-item-decrease-quantity'
+    ),
 ]

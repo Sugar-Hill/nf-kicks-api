@@ -1,12 +1,11 @@
 from django.contrib import admin
 from .models import (
-    OrderItem,
+    CartItem,
     Order,
 )
 
+
 # Register your models here.
-
-
 class OrderAdmin(admin.ModelAdmin):
     list_display = ['user',
                     'start_date',
@@ -24,8 +23,9 @@ class OrderAdmin(admin.ModelAdmin):
     search_fields = [
         'user__email',
     ]
+
     # actions = [make_refund_accepted]
 
 
-admin.site.register(OrderItem)
+admin.site.register(CartItem)
 admin.site.register(Order, OrderAdmin)

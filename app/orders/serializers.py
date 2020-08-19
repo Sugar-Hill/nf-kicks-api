@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Order, OrderItem
+from .models import Order, CartItem
 
 from products.serializers import (
     ProductListSerializer,
@@ -8,13 +8,13 @@ from products.serializers import (
 )
 
 
-class OrderItemSerializer(serializers.ModelSerializer):
+class CartItemSerializer(serializers.ModelSerializer):
     product = serializers.SerializerMethodField()
     product_variations = serializers.SerializerMethodField()
     final_price = serializers.SerializerMethodField()
 
     class Meta:
-        model = OrderItem
+        model = CartItem
         fields = (
             'id',
             'product',
@@ -37,19 +37,19 @@ class OrderItemSerializer(serializers.ModelSerializer):
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    order_items = serializers.SerializerMethodField()
+    cart_items = serializers.SerializerMethodField()
     total = serializers.SerializerMethodField()
 
     class Meta:
         model = Order
         fields = (
             'id',
-            'order_items',
+            'cart_items',
             'total',
         )
 
-    def get_order_items(self, obj):
-        return OrderItemSerializer(obj.order_items.all(), many=True, context=self.context).data
+    def get_cart_items(self, obj):
+        return CartItemSerializer(obj.cart_items.all(), many=True, context=self.context).data
 
     def get_total(self, obj):
         return obj.get_total()
