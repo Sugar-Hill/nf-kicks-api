@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'products',
     'orders',
+    'carts',
     'users',
     'payments'
 ]
@@ -88,7 +89,7 @@ WSGI_APPLICATION = 'app.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'nf_kicks_ecommerce',
+        'NAME': 'nf_kicks',
         'USER': 'postgres',
         'PASSWORD': '',
         'HOST': 'localhost',
@@ -151,3 +152,6 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
     ),
 }
+
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_VERIFICATION = 'none'

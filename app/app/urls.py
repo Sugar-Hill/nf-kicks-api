@@ -18,6 +18,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('rest-auth/', include('rest_auth.urls')),
@@ -26,9 +27,10 @@ urlpatterns = [
 
 urlpatterns += [
     path('products/', include('products.urls')),
-    path('cart/', include('orders.urls')),
+    path('cart/', include('carts.urls')),
     path('user/', include('users.urls')),
     path('', include('payments.urls')),
+    path('orders/', include('orders.urls')),
 ]
 
 if settings.DEBUG:

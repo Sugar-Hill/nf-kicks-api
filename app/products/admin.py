@@ -3,8 +3,7 @@ from django.contrib import admin
 from .models import (
     Product,
     ProductImage,
-    ProductVariation,
-    Variation,
+    Size,
     Category
 )
 
@@ -12,7 +11,7 @@ from .models import (
 class CategoryInLineAdmin(admin.TabularInline):
     model = Category
     extra = 0
-    max_num = 5
+    max_num = 2
 
 
 class ProductImageInLineAdmin(admin.TabularInline):
@@ -21,51 +20,54 @@ class ProductImageInLineAdmin(admin.TabularInline):
     max_num = 5
 
 
-class VariationInLineAdmin(admin.TabularInline):
-    model = Variation
+class SizeInLineAdmin(admin.TabularInline):
+    model = Size
     extra = 0
-    max_num = 2
-
-
-class ProductVariationInLineAdmin(admin.TabularInline):
-    model = ProductVariation
-    extra = 0
-    max_num = 12
+    max_num = 17
 
 
 # Register your models here.
+@admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
+    search_fields = ('title',)
     list_display = [
         'title',
         'price',
+        # 'nfc_code',
         'slug',
         'image',
     ]
     inlines = [
         ProductImageInLineAdmin,
-        VariationInLineAdmin,
+        SizeInLineAdmin,
     ]
 
 
-class VariationAdmin(admin.ModelAdmin):
+@admin.register(Size)
+class SizeAdmin(admin.ModelAdmin):
+    search_fields = ('product__title',)
+    list_filter = ('size',)
     list_display = [
-        'name',
         'product',
-    ]
-    inlines = [
-        ProductVariationInLineAdmin,
+        'size',
+        'stock'
     ]
 
 
+@admin.register(ProductImage)
+class ProductImageAdmin(admin.ModelAdmin):
+    search_fields = ('product__title',)
+    list_filter = ('product__title',)
+    list_display = [
+        'product',
+        'image',
+    ]
+
+
+@admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
+    search_fields = ('title',)
     list_display = [
         'title',
         'slug',
     ]
-
-
-admin.site.register(Product, ProductAdmin)
-admin.site.register(Category, CategoryAdmin)
-admin.site.register(ProductImage)
-admin.site.register(Variation, VariationAdmin)
-admin.site.register(ProductVariation)

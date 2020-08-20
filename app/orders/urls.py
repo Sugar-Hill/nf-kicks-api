@@ -1,26 +1,14 @@
-from django.urls import path, include
+from django.urls import path
 
 from .views import (
-    AddToCartView,
-    CartView,
-    CartItemDeleteView,
-    CartItemDecreaseQuantity
+    OrderListView,
 )
 
 
 app_name = 'orders'
 
 urlpatterns = [
-    path('', CartView.as_view(), name='cart-items'),
-    path('add/', AddToCartView.as_view(), name='add-to-cart'),
-    path(
-        '<pk>/delete/',
-        CartItemDeleteView.as_view(),
-        name='cart-item-delete'
-    ),
-    path(
-        'decrease/',
-        CartItemDecreaseQuantity.as_view(),
-        name='cart-item-decrease-quantity'
-    ),
+    path('', OrderListView.as_view(), name='orders'),
+    # path('payments/', PaymentListView.as_view(), name='payment-list'),
+
 ]

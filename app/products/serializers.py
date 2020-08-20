@@ -1,9 +1,9 @@
 from rest_framework import serializers
+
 from .models import (
     Product,
     ProductImage,
-    ProductVariation,
-    Variation,
+    Size,
     Category
 )
 
@@ -17,9 +17,9 @@ class CategoryListSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Category
         fields = (
-            'url',
             'id',
             'title',
+            'url',
         )
 
 
@@ -35,6 +35,7 @@ class CategoryDetailSerializer(CategoryListSerializer):
         )
 
     def get_products(self, obj):
+        # The source of the SSL context override
         return ProductListSerializer(obj.product_set.all(), many=True, context=self.context).data
 
 
@@ -45,17 +46,17 @@ class ProductListSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Product
         fields = (
-            'url',
             'id',
             'slug',
             'title',
             'price',
             'image',
+            'url',
         )
 
 
 class ProductDetailSerializer(ProductListSerializer):
-    variations = serializers.SerializerMethodField()
+    sizes = serializers.SerializerMethodField()
     productImages = serializers.SerializerMethodField()
     categories = CategoryListSerializer(many=True)
 
@@ -67,13 +68,13 @@ class ProductDetailSerializer(ProductListSerializer):
             'price',
             'slug',
             'categories',
-            'variations',
+            'sizes',
             'description',
             'productImages',
         )
 
-    def get_variations(self, obj):
-        return VariationSerializer(obj.variation_set.all(), many=True).data
+    def get_sizes(self, obj):
+        return SizeSerializer(obj.size_set.all(), many=True).data
 
     def get_productImages(self, obj):
         return ProductImageSerializer(
@@ -82,31 +83,13 @@ class ProductDetailSerializer(ProductListSerializer):
         ).data
 
 
-class VariationSerializer(serializers.ModelSerializer):
-    productVariation = serializers.SerializerMethodField()
-
+class SizeSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Variation
+        model = Size
         fields = (
             'id',
-            'name',
-            'productVariation'
-        )
-
-    def get_productVariation(self, obj):
-        return ProductVariationSerializer(
-            obj.productvariation_set.all(),
-            many=True
-        ).data
-
-
-class ProductVariationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ProductVariation
-        fields = (
-            'id',
-            'value',
-            'stock'
+            'size',
+            'stock',
         )
 
 

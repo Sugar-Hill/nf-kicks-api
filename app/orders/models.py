@@ -1,10 +1,8 @@
 from django.db import models
-from django.db.models.signals import post_save
 from django.conf import settings
 
-from products.models import Product, ProductVariation
+from carts.models import CartItem
 from payments.models import Payment
-
 
 # Create your models here.
 ORDER_STATUS = (
@@ -21,25 +19,6 @@ REFUND_STATUS = (
 )
 
 
-class CartItem(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL,
-                             on_delete=models.CASCADE)
-    ordered = models.BooleanField(default=False)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    product_variations = models.ManyToManyField(ProductVariation)
-    quantity = models.IntegerField(default=1)
-
-    def __str__(self):
-        # TODO: Remove the id
-        return f"({self.id}) {self.quantity} {self.product.title}, sized {self.product_variations.first()}"
-
-    def get_total_product_price(self):
-        return self.quantity * self.product.price
-
-    def get_final_price(self):
-        return self.get_total_product_price()
-
-
 class Order(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
                              on_delete=models.CASCADE)
@@ -49,9 +28,10 @@ class Order(models.Model):
     order_status = models.CharField(
         choices=ORDER_STATUS, default='I', max_length=2)
     payment = models.ForeignKey(
-        Payment, on_delete=models.SET_NULL, blank=True, null=True)
+        Payment, on_delete=models.CASCADE, blank=True, null=True)
 
-    refund_status = models.CharField(choices=REFUND_STATUS, default=1, max_length=2)
+    refund_status = models.CharField(
+        choices=REFUND_STATUS, default='N', max_length=2)
 
     def __str__(self):
         # TODO: Might be the reason payment is not working

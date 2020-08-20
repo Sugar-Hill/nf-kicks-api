@@ -1,8 +1,6 @@
 from django.contrib import admin
-from .models import (
-    CartItem,
-    Order,
-)
+
+from .models import Order
 
 
 # Register your models here.
@@ -27,5 +25,4 @@ class OrderAdmin(admin.ModelAdmin):
     # actions = [make_refund_accepted]
 
 
-admin.site.register(CartItem)
 admin.site.register(Order, OrderAdmin)
