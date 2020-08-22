@@ -16,8 +16,7 @@ class UserProfile(models.Model):
 
 def userprofile_receiver(sender, instance, created, *args, **kwargs):
     if created:
-        # TODO: Remove variable
-        userprofile = UserProfile.objects.create(user=instance)
+        UserProfile.objects.create(user=instance)
 
 
 post_save.connect(userprofile_receiver, sender=settings.AUTH_USER_MODEL)

@@ -8,7 +8,6 @@ class PaymentSerializer(serializers.ModelSerializer):
         model = Payment
         fields = (
             'id',
-            # Link products and variations along with order status
             'amount',
-            'timestamp'
+            'ordered_date'
         )

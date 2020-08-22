@@ -11,7 +11,8 @@ from rest_framework.generics import (
 )
 
 
-# Create your views here.
+# TODO: Write a view to retrieve a product using the nfc-code
+
 class ProductListView(ListAPIView):
     serializer_class = ProductListSerializer
     queryset = Product.objects.all()

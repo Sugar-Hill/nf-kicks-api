@@ -33,7 +33,7 @@ class ProductAdmin(admin.ModelAdmin):
     list_display = [
         'title',
         'price',
-        # 'nfc_code',
+        'nfc_code',
         'slug',
         'image',
     ]
@@ -45,11 +45,12 @@ class ProductAdmin(admin.ModelAdmin):
 
 @admin.register(Size)
 class SizeAdmin(admin.ModelAdmin):
-    search_fields = ('product__title',)
+    search_fields = ('product__title', 'size',)
     list_filter = ('size',)
     list_display = [
         'product',
         'size',
+        'slug',
         'stock'
     ]
 

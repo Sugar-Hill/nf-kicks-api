@@ -3,11 +3,10 @@ from django.contrib import admin
 from .models import Order
 
 
-# Register your models here.
+@admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     list_display = ['user',
                     'start_date',
-                    'ordered_date',
                     'order_status',
                     'payment',
                     'refund_status',
@@ -23,6 +22,3 @@ class OrderAdmin(admin.ModelAdmin):
     ]
 
     # actions = [make_refund_accepted]
-
-
-admin.site.register(Order, OrderAdmin)

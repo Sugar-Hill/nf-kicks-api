@@ -6,12 +6,16 @@ from rest_framework.generics import (
 
 from .models import Order
 
-from .serializers import OrderSerializer
-# Create your views here.
+from .serializers import PaymentOrderSerializer, PaymentOrderDetailSerializer
 
 
 class OrderListView(ListAPIView):
     permission_classes = (IsAuthenticated,)
+    serializer_class = PaymentOrderSerializer
+    queryset = Order.objects.all().exclude(order_status='In Cart')
 
-    serializer_class = OrderSerializer
-    queryset = Order.objects.all().exclude(order_status='I')
+
+class OrderDetailView(RetrieveAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = PaymentOrderDetailSerializer
+    queryset = Order.objects.all().exclude(order_status='In Cart')

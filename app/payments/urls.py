@@ -1,15 +1,10 @@
-from django.urls import path, include
+from django.urls import path
 
-from .views import (
-    PaymentView,
-    PaymentListView
-)
+from .views import PaymentView
 
 
 app_name = 'payments'
 
 urlpatterns = [
     path('checkout/', PaymentView.as_view(), name='checkout'),
-    path('payments/', PaymentListView.as_view(), name='payment-list'),
-
 ]

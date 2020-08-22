@@ -4,7 +4,7 @@ from .views import (
     AddToCartView,
     CartView,
     CartItemDeleteView,
-    CartItemDecreaseQuantity
+    ReduceCartItem
 )
 
 
@@ -12,15 +12,15 @@ app_name = 'carts'
 
 urlpatterns = [
     path('', CartView.as_view(), name='cart-items'),
-    path('add/', AddToCartView.as_view(), name='add-to-cart'),
+    path('add/', AddToCartView.as_view(), name='add-to-item-cart'),
     path(
         '<pk>/delete/',
         CartItemDeleteView.as_view(),
         name='cart-item-delete'
     ),
     path(
-        'decrease/',
-        CartItemDecreaseQuantity.as_view(),
-        name='cart-item-decrease-quantity'
+        'reduce/',
+        ReduceCartItem.as_view(),
+        name='reduce-cart-item-quantity'
     ),
 ]

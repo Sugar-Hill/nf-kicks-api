@@ -6,16 +6,16 @@ from payments.models import Payment
 
 # Create your models here.
 ORDER_STATUS = (
-    ('I', 'In Cart'),
-    ('O', 'Ordered'),
-    ('F', 'Fulfilled'),
-    ('C', 'Completed')
+    ('In Cart', 'In Cart'),
+    ('Ordered', 'Ordered'),
+    ('Fulfilled', 'Fulfilled'),
+    ('Completed', 'Completed')
 )
 
 REFUND_STATUS = (
-    ('N', 'None'),
-    ('R', 'Requested'),
-    ('G', 'Granted')
+    ('None', 'None'),
+    ('Requested', 'Requested'),
+    ('Granted', 'Granted')
 )
 
 
@@ -24,14 +24,12 @@ class Order(models.Model):
                              on_delete=models.CASCADE)
     cart_items = models.ManyToManyField(CartItem)
     start_date = models.DateTimeField(auto_now_add=True)
-    ordered_date = models.DateTimeField(blank=True, null=True)
     order_status = models.CharField(
-        choices=ORDER_STATUS, default='I', max_length=2)
+        choices=ORDER_STATUS, default='In Cart', max_length=9)
     payment = models.ForeignKey(
         Payment, on_delete=models.CASCADE, blank=True, null=True)
-
     refund_status = models.CharField(
-        choices=REFUND_STATUS, default='N', max_length=2)
+        choices=REFUND_STATUS, default='None', max_length=9)
 
     def __str__(self):
         # TODO: Might be the reason payment is not working
@@ -42,12 +40,3 @@ class Order(models.Model):
         for cart_item in self.cart_items.all():
             total += cart_item.get_final_price()
         return total
-
-
-# def decrease_stock_receiver(sender, instance, created, *args, **kwargs):
-#     if created:
-#         for productVariation in instance.order_items.product_variations:
-#             productVariation.stock -= productVariation.stock
-
-
-# post_save.connect(decrease_stock_receiver, sender=Order)

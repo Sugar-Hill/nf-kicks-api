@@ -2,27 +2,26 @@ import stripe
 from django.conf import settings
 from django.utils import timezone
 
-from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 
-from .serializers import PaymentSerializer
 from .models import Payment
 
 from orders.models import Order
 from users.models import UserProfile
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
+
+# TODO: Write a view to retrieve a payment with the stripe charge id
+
 # Create your views here.
-
-
 class PaymentView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request, *args, **kwargs):
-        order = Order.objects.get(user=self.request.user, order_status='I')
+        order = Order.objects.get(user=self.request.user, order_status='In Cart')
         userprofile = UserProfile.objects.get(user=self.request.user)
         token = request.data.get('stripeToken')
 
@@ -45,40 +44,27 @@ class PaymentView(APIView):
         amount = int(order.get_total() * 100)
 
         try:
-
-            # charge the customer because we cannot charge the token more than once
             charge = stripe.Charge.create(
                 amount=amount,  # cents
-                currency="usd",
+                currency="eur",
                 customer=userprofile.stripe_customer_id
             )
-            # charge once off on the token
-            # charge = stripe.Charge.create(
-            #     amount=amount,  # cents
-            #     currency="usd",
-            #     source=token
-            # )
 
-            # create the payment
             payment = Payment()
             payment.stripe_charge_id = charge['id']
             payment.user = self.request.user
             payment.amount = order.get_total()
             payment.save()
 
-            # assign the payment to the order
-
             order_cart_items = order.cart_items.all()
             order_cart_items.update(ordered=True)
             for item in order_cart_items:
                 item.save()
 
-            order.order_status = 'O'
+            order.order_status = 'Ordered'
             order.ordered_date = timezone.now()
             order.payment = payment
             order.save()
-            
-            # TODO: Update product variation's stock
 
             return Response(status=HTTP_200_OK)
 
@@ -116,11 +102,3 @@ class PaymentView(APIView):
         #     return Response({"message": "A serious error occurred. We have been notifed."}, status=HTTP_400_BAD_REQUEST)
 
         return Response({"message": "Invalid data received"}, status=HTTP_400_BAD_REQUEST)
-
-
-class PaymentListView(ListAPIView):
-    permission_classes = (IsAuthenticated, )
-    serializer_class = PaymentSerializer
-
-    def get_queryset(self):
-        return Payment.objects.filter(user=self.request.user)

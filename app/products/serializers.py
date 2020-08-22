@@ -66,6 +66,7 @@ class ProductDetailSerializer(ProductListSerializer):
             'id',
             'title',
             'price',
+            'image',
             'slug',
             'categories',
             'sizes',
@@ -89,6 +90,7 @@ class SizeSerializer(serializers.ModelSerializer):
         fields = (
             'id',
             'size',
+            'slug',
             'stock',
         )
 

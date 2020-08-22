@@ -1,4 +1,3 @@
-from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.http import Http404
 from django.core.exceptions import ObjectDoesNotExist
@@ -10,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 
 from .models import CartItem
-from products.models import Product, Size
+from products.models import Size
 from orders.models import Order
 
 from orders.serializers import OrderSerializer
@@ -22,7 +21,6 @@ class AddToCartView(APIView):
 
     def post(self, request, *args, **kwargs):
         slug = request.data.get('slug', None)
-        variations = request.data.get('variations', [])
         if slug is None:
             return Response(
                 {
@@ -31,55 +29,47 @@ class AddToCartView(APIView):
                 status=HTTP_400_BAD_REQUEST
             )
 
-        product = get_object_or_404(Product, slug=slug)
+        size = get_object_or_404(Size, slug=slug)
 
-        minimum_variation_count = Variation.objects.filter(
-            product=product
-        ).count()
-        if len(variations) < minimum_variation_count:
-            return Response(
-                {
-                    "message": "Please specify the required variations!"
-                },
-                status=HTTP_400_BAD_REQUEST
-            )
-
-        cart_item_qs = CartItem.objects.filter(
-            product=product,
-            user=request.user,
-            ordered=False
-        )
-        for v in variations:
-            cart_item_qs = cart_item_qs.filter(
-                Q(product_variations__exact=v)
-            )
-
-        if cart_item_qs.exists():
-            cart_item = cart_item_qs.first()
-            cart_item.quantity += 1
-            cart_item.save()
-        else:
-            cart_item = CartItem.objects.create(
-                product=product,
+        if size.stock > 1:
+            cart_item_qs = CartItem.objects.filter(
+                size=size,
                 user=request.user,
                 ordered=False
             )
-            cart_item.product_variations.add(*variations)
-            cart_item.save()
 
-        order_qs = Order.objects.filter(user=request.user, order_status='I')
-        if order_qs.exists():
-            order = order_qs[0]
-            if not order.cart_items.filter(
-                product__id=cart_item.id
-            ).exists():
+            if cart_item_qs.exists():
+                cart_item = cart_item_qs.first()
+                cart_item.quantity += 1
+                cart_item.save()
+                return Response(status=HTTP_200_OK)
+            else:
+                cart_item = CartItem.objects.create(
+                    size=size,
+                    user=request.user,
+                    ordered=False
+                )
+                cart_item.save()
+
+            order_qs = Order.objects.filter(
+                user=request.user, order_status='In Cart')
+            if order_qs.exists():
+                order = order_qs[0]
+                if not order.cart_items.filter(size__id=cart_item.id).exists():
+                    order.cart_items.add(cart_item)
+                    return Response(status=HTTP_200_OK)
+
+            else:
+                order = Order.objects.create(user=request.user)
                 order.cart_items.add(cart_item)
                 return Response(status=HTTP_200_OK)
-
         else:
-            order = Order.objects.create(user=request.user)
-            order.cart_items.add(cart_item)
-            return Response(status=HTTP_200_OK)
+            return Response(
+                {
+                    "message": "This item's size is out of stock!"
+                },
+                status=HTTP_400_BAD_REQUEST
+            )
 
 
 class CartView(RetrieveAPIView):
@@ -89,23 +79,22 @@ class CartView(RetrieveAPIView):
     def get_object(self):
         try:
             order = Order.objects.get(
-                user=self.request.user, order_status='I')
+                user=self.request.user, order_status='In Cart')
             return order
         except ObjectDoesNotExist:
             raise Http404("You do not have an active order")
 
 
 class CartItemDeleteView(DestroyAPIView):
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated,)
     queryset = CartItem.objects.all()
 
 
-class CartItemDecreaseQuantity(APIView):
+class ReduceCartItem(APIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request, *args, **kwargs):
         slug = request.data.get('slug', None)
-        variations = request.data.get('variations', [])
         if slug is None:
             return Response(
                 {
@@ -114,28 +103,13 @@ class CartItemDecreaseQuantity(APIView):
                 status=HTTP_400_BAD_REQUEST
             )
 
-        product = get_object_or_404(Product, slug=slug)
-
-        minimum_variation_count = Variation.objects.filter(
-            product=product
-        ).count()
-        if len(variations) < minimum_variation_count:
-            return Response(
-                {
-                    "message": "Please specify the required variation types"
-                },
-                status=HTTP_400_BAD_REQUEST
-            )
+        size = get_object_or_404(Size, slug=slug)
 
         cart_item_qs = CartItem.objects.filter(
-            product=product,
+            size=size,
             user=request.user,
             ordered=False
         )
-        for v in variations:
-            cart_item_qs = cart_item_qs.filter(
-                Q(product_variations__exact=v)
-            )
 
         if cart_item_qs.exists():
             cart_item = cart_item_qs.first()

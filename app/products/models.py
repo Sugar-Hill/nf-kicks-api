@@ -3,6 +3,7 @@ import uuid
 from django.db import models
 from django.utils.text import slugify
 from django.db.models.signals import pre_save
+from django.dispatch import receiver
 from django.core.validators import (
     validate_slug,
     validate_image_file_extension,
@@ -34,12 +35,10 @@ class Category(models.Model):
         verbose_name_plural = "Categories"
 
 
+@receiver(pre_save, sender=Category)
 def category_pre_save_receiver(sender, instance, *args, **kwargs):
     if not instance.slug or instance.slug is not instance.title:
         instance.slug = slugify(instance)
-
-
-pre_save.connect(category_pre_save_receiver, sender=Category)
 
 
 def product_image_upload_to(instance, filename):
@@ -82,26 +81,23 @@ class Product(models.Model):
         blank=False,
         validators=[validate_image_file_extension, validate_image_size]
     )
-    # TODO Drop the DB to use this
-    # nfc_code = models.CharField(max_length=100, editable=False, unique=True)
+    nfc_code = models.CharField(
+        max_length=100, unique=True, editable=False)
 
     def __str__(self):
         return self.title
 
 
+@receiver(pre_save, sender=Product)
 def product_slug_pre_save_receiver(sender, instance, *args, **kwargs):
     if not instance.slug or instance.slug is not instance.title:
         instance.slug = slugify(instance)
 
 
-# def product_nfc_code_pre_save_receiver(sender, instance, *args, **kwargs):
-#     if not instance.nfc_code:
-#         instance.nfc_code = str(uuid.uuid4())
-
-
-pre_save.connect(product_slug_pre_save_receiver, sender=Product)
-
-# pre_save.connect(product_nfc_code_pre_save_receiver, sender=Product)
+@receiver(pre_save, sender=Product)
+def product_nfc_code_pre_save_receiver(sender, instance, *args, **kwargs):
+    if not instance.nfc_code:
+        instance.nfc_code = str(uuid.uuid4())
 
 
 class ProductImage(models.Model):
@@ -140,10 +136,20 @@ SIZE_CHOICES = (
 class Size(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     size = models.FloatField(choices=SIZE_CHOICES, blank=False, validators=[
-        MinValueValidator(0), MaxValueValidator(10000)])
+        MinValueValidator(0), MaxValueValidator(100)])
+    slug = models.SlugField(
+        editable=False,
+        validators=[validate_slug]
+    )
     # TODO: Decrease the stock when a purchase is made
     stock = models.PositiveIntegerField(default=100, validators=[
         MinValueValidator(0), MaxValueValidator(100)])
 
     def __str__(self):
         return f"{self.product.title}, size {self.size}"
+
+
+@receiver(pre_save, sender=Size)
+def size_slug_pre_save_receiver(sender, instance, *args, **kwargs):
+    if not instance.slug or instance.slug not in str(instance.size):
+        instance.slug = slugify(instance.product.title + "-" + str(instance.size))
