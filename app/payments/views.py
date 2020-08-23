@@ -1,11 +1,17 @@
 import stripe
 from django.conf import settings
 from django.utils import timezone
+from django_filters.rest_framework import DjangoFilterBackend
 
+
+from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
+
+from .serializers import PaymentSerializer
+
 
 from .models import Payment
 
@@ -15,6 +21,7 @@ from users.models import UserProfile
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 # TODO: Write a view to retrieve a payment with the stripe charge id
+
 
 # Create your views here.
 class PaymentView(APIView):
@@ -102,3 +109,13 @@ class PaymentView(APIView):
         #     return Response({"message": "A serious error occurred. We have been notifed."}, status=HTTP_400_BAD_REQUEST)
 
         return Response({"message": "Invalid data received"}, status=HTTP_400_BAD_REQUEST)
+
+
+class PaymentListView(ListAPIView):
+    permission_classes = (IsAuthenticated, )
+    serializer_class = PaymentSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['stripe_charge_id']
+
+    def get_queryset(self):
+        return Payment.objects.filter(user=self.request.user)

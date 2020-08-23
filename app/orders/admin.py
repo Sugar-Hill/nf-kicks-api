@@ -18,7 +18,7 @@ class OrderAdmin(admin.ModelAdmin):
     list_filter = ['order_status',
                    'refund_status']
     search_fields = [
-        'user__email',
+        'user__username',
     ]
 
     # actions = [make_refund_accepted]

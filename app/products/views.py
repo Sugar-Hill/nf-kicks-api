@@ -1,3 +1,5 @@
+from django_filters.rest_framework import DjangoFilterBackend
+
 from .models import Product, Category
 from .serializers import (
     ProductListSerializer,
@@ -5,17 +7,21 @@ from .serializers import (
     CategoryListSerializer,
     CategoryDetailSerializer,
 )
+from rest_framework import filters
 from rest_framework.generics import (
     ListAPIView,
     RetrieveAPIView
 )
 
 
-# TODO: Write a view to retrieve a product using the nfc-code
-
 class ProductListView(ListAPIView):
     serializer_class = ProductListSerializer
     queryset = Product.objects.all()
+    filter_backends = [DjangoFilterBackend,
+                       filters.OrderingFilter, filters.SearchFilter]
+    search_fields = ['title']
+    ordering_fields = ['price']
+    filterset_fields = ['nfc_code']
 
 
 class ProductDetailView(RetrieveAPIView):

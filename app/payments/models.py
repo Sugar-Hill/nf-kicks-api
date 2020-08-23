@@ -1,8 +1,6 @@
 from django.db import models
 from django.conf import settings
 
-from carts.models import CartItem
-
 
 # Create your models here.
 class Payment(models.Model):
